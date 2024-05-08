@@ -665,6 +665,7 @@ lt:
       invalid_context: Jokio arba netinkamas pateiktas kontekstas
     index:
       delete: Ištrinti
+      empty: Neturi jokių filtrų.
       title: Filtrai
     new:
       title: Pridėti naują filtrą

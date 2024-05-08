@@ -962,6 +962,7 @@ ia:
     confirmation_dialogs: Dialogos de confirmation
     discovery: Discoperta
     localization:
+      body: Mastodon es traducite per voluntarios.
       guide_link: https://crowdin.com/project/mastodon
       guide_link_text: Totes pote contribuer.
     sensitive_content: Contento sensibile
@@ -1206,6 +1207,10 @@ ia:
     activity: Activitate del conto
     most_recent: Plus recente
     status: Stato del conto
+  rss:
+    content_warning: 'Advertimento de contento:'
+    descriptions:
+      account: Messages public de @%{acct}
   sessions:
     activity: Ultime activitate
     browser: Navigator
@@ -1253,6 +1258,7 @@ ia:
     delete: Deletion de conto
     development: Disveloppamento
     edit_profile: Modificar profilo
+    featured_tags: Hashtags eminente
     import: Importar
     migrate: Migration de conto
     notifications: Notificationes de e-mail
@@ -1261,7 +1267,9 @@ ia:
     relationships: Sequites e sequitores
     strikes: Admonitiones de moderation
   severed_relationships:
+    download: Discargar (%{count})
     event_type:
+      account_suspension: Suspension del conto (%{target_name})
       domain_block: Suspension del servitor (%{target_name})
       user_domain_block: Tu ha blocate %{target_name}
     preamble: Tu pote perder sequites e sequitores quando tu bloca un dominio o quando tu moderatores decide suspender un servitor remote. Quando isto occurre, tu potera discargar listas de relationes rumpite, a inspectar e eventualmente importar in un altere servitor.
