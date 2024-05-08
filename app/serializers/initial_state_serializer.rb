@@ -86,27 +86,37 @@ class InitialStateSerializer < ActiveModel::Serializer
   private
 
   def default_meta_store
+    settings = Setting.fetch_multi(
+      :activity_api_enabled,
+      :profile_directory,
+      :registrations_mode,
+      :status_page_url,
+      :timeline_preview,
+      :trends_as_landing_page,
+      :trends
+    )
+
     {
       access_token: object.token,
-      activity_api_enabled: Setting.activity_api_enabled,
+      activity_api_enabled: settings.fetch(:activity_api_enabled),
       admin: object.admin&.id&.to_s,
       domain: Addressable::IDNA.to_unicode(instance_presenter.domain),
       limited_federation_mode: Rails.configuration.x.limited_federation_mode,
       locale: I18n.locale,
       mascot: instance_presenter.mascot&.file&.url,
-      profile_directory: Setting.profile_directory,
-      registrations_open: Setting.registrations_mode != 'none' && !Rails.configuration.x.single_user_mode,
+      profile_directory: settings.fetch(:profile_directory),
+      registrations_open: settings.fetch(:registrations_mode) != 'none' && !Rails.configuration.x.single_user_mode,
       repository: Mastodon::Version.repository,
       search_enabled: Chewy.enabled?,
       single_user_mode: Rails.configuration.x.single_user_mode,
       source_url: instance_presenter.source_url,
       sso_redirect: sso_redirect,
-      status_page_url: Setting.status_page_url,
+      status_page_url: settings.fetch(:status_page_url),
       streaming_api_base_url: Rails.configuration.x.streaming_api_base_url,
-      timeline_preview: Setting.timeline_preview,
+      timeline_preview: settings.fetch(:timeline_preview),
       title: instance_presenter.title,
-      trends_as_landing_page: Setting.trends_as_landing_page,
-      trends_enabled: Setting.trends,
+      trends_as_landing_page: settings.fetch(:trends_as_landing_page),
+      trends_enabled: settings.fetch(:trends),
       version: instance_presenter.version,
     }
   end

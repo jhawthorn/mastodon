@@ -75,10 +75,20 @@ class Setting < ApplicationRecord
       "rails_settings_cached/#{cache_prefix_by_startup}/#{var_name}"
     end
 
+    def fetch_multi(*vars)
+      cache_key_to_var = vars.index_by {|x| cache_key(x) }
+      cache_keys = cache_key_to_var.keys
+      results = Rails.cache.fetch_multi(*cache_keys) do |cache_key|
+        var = cache_key_to_var[cache_key]
+        read_from_db(var)
+      end.transform_keys do |cache_key|
+        cache_key_to_var[cache_key]
+      end
+    end
+
     def [](key)
       Rails.cache.fetch(cache_key(key)) do
-        db_val = find_by(var: key)
-        db_val ? db_val.value : default_settings[key]
+        read_from_db(key)
       end
     end
 
@@ -95,6 +105,13 @@ class Setting < ApplicationRecord
       content = Rails.root.join('config', 'settings.yml').read
       hash = content.empty? ? {} : YAML.safe_load(ERB.new(content).result, aliases: true).to_hash
       @default_settings = (hash[Rails.env] || {}).freeze
+    end
+
+    private
+
+    def read_from_db(key)
+      db_val = find_by(var: key)
+      db_val ? db_val.value : default_settings[key]
     end
   end
 

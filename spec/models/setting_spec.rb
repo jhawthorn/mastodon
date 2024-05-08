@@ -12,6 +12,70 @@ RSpec.describe Setting do
     end
   end
 
+  describe '.fetch_multi' do
+    let(:key)         { 'key' }
+    let(:cache_key)   { 'cache-key' }
+    let(:cache_value) { 'cache-value' }
+
+    before do
+      allow(described_class).to receive(:cache_key).with(key).and_return(cache_key)
+    end
+
+    context 'when Rails.cache does not exists' do
+      let(:default_value)    { 'default_value' }
+      let(:default_settings) { { key => default_value } }
+      let(:save_setting)     { true }
+
+      before do
+        allow(described_class).to receive(:default_settings).and_return(default_settings)
+
+        Fabricate(:setting, var: key, value: 42) if save_setting
+
+        Rails.cache.delete(cache_key)
+      end
+
+      context 'when the setting has been saved to database' do
+        it 'returns the value from database' do
+          callback = double
+          allow(callback).to receive(:call)
+
+          ActiveSupport::Notifications.subscribed callback, 'sql.active_record' do
+            expect(described_class[key]).to eq 42
+          end
+
+          expect(callback).to have_received(:call)
+        end
+      end
+
+      context 'when the setting has not been saved to database' do
+        let(:save_setting) { false }
+
+        it 'returns default_settings[key]' do
+          expect(described_class.fetch_multi(key)).to eq(key => expected_value)
+        end
+      end
+    end
+
+    context 'when Rails.cache exists' do
+      before do
+        Rails.cache.write(cache_key, cache_value)
+      end
+
+      it 'does not query the database' do
+        callback = double
+        allow(callback).to receive(:call)
+        ActiveSupport::Notifications.subscribed callback, 'sql.active_record' do
+          expect(described_class.fetch_multi(key)).to eq(key => cache_value)
+        end
+        expect(callback).to_not have_received(:call)
+      end
+
+      it 'returns the cached value' do
+        expect(described_class[key]).to eq cache_value
+      end
+    end
+  end
+
   describe '.[]' do
     let(:key)         { 'key' }
     let(:cache_key)   { 'cache-key' }
